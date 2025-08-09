@@ -132,6 +132,38 @@ func (tl *TodoList) ListPending() {
 	}
 }
 
+func (tl *TodoList) DeleteCompleted() {
+	if len(tl.Tasks) == 0 {
+		fmt.Println("No tasks to delete")
+		return
+	}
+
+	deleted := []Task{}
+
+
+	for _, task := range tl.Tasks {
+		if task.Completed {
+			fmt.Printf("Deleting completed task: %d - %s\n", task.ID, task.Description)
+			deleted = append(deleted, task)
+			tl.Delete(task.ID)
+		}
+	}
+
+	if len(deleted) == 0 {
+		fmt.Println("No completed tasks to delete")
+		return
+	}
+
+	fmt.Printf("\n Deleting %d completed tasks: \n", len(deleted))
+	fmt.Println("================")
+
+	for _, task := range deleted {
+		fmt.Printf("Deleted: %d - %s\n", task.ID, task.Description)
+	}
+
+	fmt.Printf("Deleted %d completed tasks\n", len(deleted))
+}
+
 func (tl *TodoList) Stats() {
 	total := len(tl.Tasks)
 	completed := 0
@@ -193,6 +225,7 @@ func showUsage() {
 	fmt.Println("  todo -pending                    List pending tasks only")
 	fmt.Println("  todo -complete 1                 Mark task #1 as complete")
 	fmt.Println("  todo -delete 1                   Delete task #1")
+	fmt.Println("  todo -delete-completed           Delete all completed tasks")
 	fmt.Println("  todo -stats                      Show task statistics")
 	fmt.Println("  todo -help                       Show this help message")
 	fmt.Println()
@@ -202,6 +235,7 @@ func showUsage() {
 	fmt.Println("  todo -list")
 	fmt.Println("  todo -complete 1")
 	fmt.Println("  todo -delete 2")
+	fmt.Println("  todo -delete-completed")
 }
 
 func main() {
@@ -211,6 +245,7 @@ func main() {
 		pending = flag.Bool("pending", false, "List pending tasks only")
 		complete = flag.Int("complete", 0, "Mark task as complete")
 		delete = flag.Int("delete", 0, "Delete a task")
+		deleteCompleted = flag.Bool("delete-completed", false, "Delete all completed tasks")
 		stats = flag.Bool("stats", false, "Show task statistics")
 		help = flag.Bool("help", false, "Show this help message")
 	)
@@ -240,7 +275,10 @@ func main() {
 		todo.Complete(*complete)
 
 	case *delete > 0:
-		todo.Delete(*delete)
+		todo.Delete(*delete) 
+
+	case *deleteCompleted:
+		todo.DeleteCompleted()
 
 	case *stats:
 		todo.Stats()
